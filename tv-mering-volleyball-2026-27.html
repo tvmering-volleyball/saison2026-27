@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TV Mering Volleyball – Saison 2026/27</title>
+
+<!--
+========================================================================
+  BEARBEITEN – so änderst du Termine, Teams und Farben
+========================================================================
+  Alles, was du anpassen musst, steht im <script id="daten"> weiter unten.
+  Der restliche Code (CSS + Anzeige-Logik) muss NICHT angefasst werden.
+
+  1) TEAMS  – Name + Farbe je Mannschaft. Kürzel (D/H1/H2) nicht ändern,
+              sie verbinden Team und Spieltag.
+  2) SPIELTAGE – ein Eintrag pro Spieltag. Felder:
+       datum:      "JJJJ-MM-TT"  (z. B. "2026-10-10") – wird für die
+                   Sortierung genutzt; Wochentag/Format macht die Seite selbst.
+       team:       "D" | "H1" | "H2"
+       zeit:       "11:00"
+       ausrichter: wer den Spieltag ausrichtet. Beginnt der Text mit
+                   "TV Mering", wird der Spieltag automatisch als Heimspiel
+                   markiert.
+       spiele:     Liste der Gegner an diesem Spieltag, z. B.
+                   ["TSV Aichach II", "TSV Aichach III"]
+  3) STAND – das Datum unten im Footer ("stand") einfach überschreiben.
+
+  Neuen Spieltag hinzufügen: eine Zeile { ... } kopieren, Werte ändern,
+  mit Komma abschließen. Reihenfolge egal – es wird nach Datum + Zeit sortiert.
+========================================================================
+-->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+  :root{
+    --ink:#17202e;
+    --ink-soft:#5a6473;
+    --bg:#f5f7fa;
+    --surface:#ffffff;
+    --line:#e4e8ef;
+    --line-strong:#cfd6e0;
+    --radius:12px;
+    --maxw:960px;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#eef1f6; --ink-soft:#a3adbc; --bg:#11151c; --surface:#181d26;
+      --line:#2a323f; --line-strong:#3a4453;
+    }
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:clamp(20px,4vw,44px) clamp(16px,4vw,28px) 64px;}
+
+  /* ---------- Kopf ---------- */
+  header{margin-bottom:26px;}
+  .club{
+    font-family:'Space Grotesk',sans-serif; font-weight:500;
+    letter-spacing:.14em; font-size:.82rem; color:var(--ink-soft); margin:0 0 6px;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:clamp(1.9rem,6vw,3rem); line-height:1.02; margin:0; letter-spacing:-.01em;
+  }
+  .season{
+    font-family:'Space Grotesk',sans-serif; font-weight:500;
+    font-size:clamp(1.05rem,3.2vw,1.35rem); color:var(--ink-soft); margin:6px 0 0;
+  }
+
+  /* ---------- Steuerung / Legende ---------- */
+  .controls{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:5;
+    background:var(--bg); padding:14px 0 12px; margin-top:22px;
+    border-bottom:1px solid var(--line); display:flex; flex-wrap:wrap;
+    gap:8px 8px; align-items:center;
+  }
+  .filter{
+    appearance:none; border:1px solid var(--line-strong); background:var(--surface);
+    color:var(--ink); font:inherit; font-size:.9rem; font-weight:500;
+    padding:7px 13px 7px 11px; border-radius:999px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px; transition:opacity .15s, border-color .15s;
+  }
+  .filter .dot{width:12px; height:12px; border-radius:50%; background:var(--c); flex:none;}
+  .filter[aria-pressed="false"]{opacity:.4;}
+  .filter:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  .controls .spacer{flex:1 1 auto;}
+  .toggle{margin-left:auto;}
+
+  /* ---------- Spieltag-Gruppen (nach Wochen) ---------- */
+  .week{
+    display:grid; grid-template-columns:150px 1fr; gap:18px;
+    padding:22px 0; border-bottom:1px solid var(--line);
+  }
+  .week[hidden]{display:none;}
+  .week__date{position:relative;}
+  .week__dow{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.02rem;
+    display:block;
+  }
+  .week__dmy{color:var(--ink-soft); font-size:.92rem; font-variant-numeric:tabular-nums;}
+  .week__matches{display:flex; flex-direction:column; gap:12px; min-width:0;}
+
+  /* ---------- Spieltag-Karte ---------- */
+  .match{
+    --team:var(--line-strong);
+    background:var(--surface); border:1px solid var(--line);
+    border-left:5px solid var(--team); border-radius:var(--radius);
+    padding:14px 16px; display:grid; gap:4px 16px;
+    grid-template-columns:auto 1fr; align-items:start;
+  }
+  .match[hidden]{display:none;}
+  .match__top{
+    grid-column:1 / -1; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-bottom:4px;
+  }
+  .chip{
+    background:var(--team); color:var(--chip-fg,#17202e); font-weight:600; font-size:.82rem;
+    padding:3px 11px; border-radius:999px; white-space:nowrap;
+  }
+  .time{font-variant-numeric:tabular-nums; font-weight:600; font-size:.95rem;}
+  .heim{
+    font-size:.72rem; font-weight:600; letter-spacing:.03em; color:var(--ink);
+    border:1px solid var(--line-strong); padding:2px 8px; border-radius:999px;
+  }
+  .games{grid-column:1 / -1; display:flex; flex-direction:column; gap:2px;}
+  .games li{list-style:none; font-size:1.02rem;}
+  .games ol,.games{margin:0; padding:0;}
+  .games .vs{color:var(--ink-soft); font-size:.86rem; margin-right:6px;}
+  .host{
+    grid-column:1 / -1; margin-top:8px; padding-top:8px; border-top:1px solid var(--line);
+    font-size:.86rem; color:var(--ink-soft);
+  }
+  .host b{color:var(--ink); font-weight:600;}
+
+  .empty{padding:40px 0; color:var(--ink-soft); text-align:center;}
+
+  footer{margin-top:34px; font-size:.82rem; color:var(--ink-soft); line-height:1.7;}
+  footer a{color:inherit;}
+
+  @media (max-width:600px){
+    .week{grid-template-columns:1fr; gap:10px; padding:18px 0;}
+    .week__date{display:flex; align-items:baseline; gap:8px;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="club">TV Mering e.&nbsp;V. · Abteilung Volleyball</p>
+    <h1>TV Mering Volleyball</h1>
+    <p class="season">Saison 2026/27</p>
+  </header>
+
+  <div class="controls" id="controls">
+    <!-- Filter-Chips werden erzeugt -->
+    <label class="filter toggle" style="--c:transparent">
+      <input type="checkbox" id="heimOnly" style="margin:0"> Nur Heimspiele
+    </label>
+  </div>
+
+  <main id="plan"><p class="empty">Wird geladen …</p></main>
+
+  <footer>
+    <p>Stand: <span id="stand">22.09.2026</span>. Alle Angaben aus dem
+       <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben" target="_blank" rel="noopener">BVV-Spielplan</a>.</p>
+    <p>Quellen:
+       <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben/team-88895" target="_blank" rel="noopener">Damen</a> ·
+       <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben/team-88792" target="_blank" rel="noopener">Herren&nbsp;1</a> ·
+       <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben/team-88800" target="_blank" rel="noopener">Herren&nbsp;2</a>
+    </p>
+  </footer>
+</div>
+
+<!-- ==================================================================
+     DATEN – hier bearbeiten (siehe Anleitung ganz oben)
+     ================================================================== -->
+<script id="daten">
+  const TEAMS = {
+    // Alte Farben (bis 22.09.2026):
+    // D:  { name: "Damen",    color: "#B5BAFF" },
+    // H1: { name: "Herren 1", color: "#B4E1EB" },
+    // H2: { name: "Herren 2", color: "#78A4CB" },
+    D:  { name: "Damen",    color: "#C9A0DC" }, // Flieder (vorher #8C0343 Bordeaux)
+    H1: { name: "Herren 1", color: "#49ACF2" },
+    H2: { name: "Herren 2", color: "#7BA388" },
+  };
+
+  const SPIELTAGE = [
+    // ---- Damen ----
+    { datum:"2026-10-10", team:"D",  zeit:"11:00", ausrichter:"TSV Königsbrunn II",       spiele:["TSV Königsbrunn II","Lechrain Volleys V"] },
+    { datum:"2026-10-17", team:"D",  zeit:"11:00", ausrichter:"TV Mering",                spiele:["TSV Haunstetten III","FC Kleinaitingen III"] },
+    { datum:"2026-11-14", team:"D",  zeit:"11:00", ausrichter:"DJK Augsburg Hochzoll V",  spiele:["DJK Augsburg Hochzoll V","Satellites Schwabmünchen"] },
+    { datum:"2026-12-05", team:"D",  zeit:"13:00", ausrichter:"TV Mering",                spiele:["TSV Friedberg III","TSV Haunstetten II"] },
+    { datum:"2026-12-19", team:"D",  zeit:"13:00", ausrichter:"TSV Haunstetten II",       spiele:["TSV Haunstetten II","TSV Haunstetten III"] },
+    { datum:"2027-01-30", team:"D",  zeit:"14:30", ausrichter:"TSV Königsbrunn II",       spiele:["TSV Königsbrunn II","Satellites Schwabmünchen"] },
+    { datum:"2027-02-06", team:"D",  zeit:"13:00", ausrichter:"TV Mering",                spiele:["FC Kleinaitingen III","DJK Augsburg Hochzoll V"] },
+    { datum:"2027-03-13", team:"D",  zeit:"11:00", ausrichter:"TSV Friedberg III",        spiele:["TSV Friedberg III","Lechrain Volleys V"] },
+
+    // ---- Herren 1 ----
+    { datum:"2026-10-10", team:"H1", zeit:"13:00", ausrichter:"SG TuS Fürstenfeldbruck / TSG Maisach", spiele:["SG TuS Fürstenfeldbruck / TSG Maisach","TSV Krumbach"] },
+    { datum:"2026-11-28", team:"H1", zeit:"14:30", ausrichter:"SSV Bobingen",             spiele:["SSV Bobingen","SVS Türkheim II"] },
+    { datum:"2026-12-05", team:"H1", zeit:"14:30", ausrichter:"TSV Krumbach",             spiele:["TSV Krumbach","TSV Nördlingen"] },
+    { datum:"2027-01-23", team:"H1", zeit:"13:00", ausrichter:"TV Mering",                spiele:["TSV Haunstetten II","TSV Nördlingen"] },
+    { datum:"2027-01-30", team:"H1", zeit:"13:00", ausrichter:"TSV Pfuhl",                spiele:["TSV Pfuhl","VfL Großkötz"] },
+    { datum:"2027-02-06", team:"H1", zeit:"13:00", ausrichter:"TV Mering",                spiele:["TSV Haunstetten II","SG TuS Fürstenfeldbruck / TSG Maisach"] },
+    { datum:"2027-02-27", team:"H1", zeit:"13:00", ausrichter:"SVS Türkheim II",          spiele:["SVS Türkheim II","TSV Pfuhl"] },
+    { datum:"2027-03-13", team:"H1", zeit:"13:00", ausrichter:"TV Mering",                spiele:["SSV Bobingen","VfL Großkötz"] },
+
+    // ---- Herren 2 ----
+    { datum:"2026-10-17", team:"H2", zeit:"13:00", ausrichter:"TSV Aichach II",           spiele:["TSV Aichach II","TSV Aichach III"] },
+    { datum:"2026-11-14", team:"H2", zeit:"13:30", ausrichter:"TSV Gersthofen II",        spiele:["TSV Gersthofen II","TSV Aichach III"] },
+    { datum:"2026-11-28", team:"H2", zeit:"11:00", ausrichter:"TSV Nördlingen II",        spiele:["TSV Nördlingen II","TSV Friedberg IV"] },
+    { datum:"2026-12-05", team:"H2", zeit:"13:00", ausrichter:"TSV Friedberg IV",         spiele:["TSV Friedberg IV","TSV Gersthofen II"] },
+    { datum:"2027-02-13", team:"H2", zeit:"13:00", ausrichter:"TV Mering",                spiele:["DJK Augsburg Hochzoll III","TSV Nördlingen II"] },
+    { datum:"2027-03-06", team:"H2", zeit:"13:00", ausrichter:"TV Mering",                spiele:["DJK Augsburg Hochzoll III","TSV Aichach II"] },
+  ];
+</script>
+
+<!-- ==================================================================
+     ANZEIGE-LOGIK – muss normalerweise nicht bearbeitet werden
+     ================================================================== -->
+<script>
+  const plan = document.getElementById('plan');
+  const controls = document.getElementById('controls');
+  const heimOnly = document.getElementById('heimOnly');
+  const aktiv = {}; // Team-Kürzel -> an/aus
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const istHeim = st => /^tv mering/i.test(st.ausrichter.trim());
+  // Wählt automatisch dunklen oder weißen Text, je nachdem was auf der
+  // Team-Farbe besser lesbar ist – funktioniert für beliebige Farben.
+  const chipFg = hex => {
+    const h = hex.replace('#','');
+    const c = [0,2,4].map(i => parseInt(h.substr(i,2),16)/255);
+    const lin = v => v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4);
+    const L = .2126*lin(c[0]) + .7152*lin(c[1]) + .0722*lin(c[2]);
+    return ((L+.05)/.05) >= (1.05/(L+.05)) ? '#17202e' : '#ffffff';
+  };
+  const dObj = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
+  const fmtDow = d => d.toLocaleDateString('de-DE', { weekday:'long' });
+  const fmtDmy = d => d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+  // Filter-Chips aus TEAMS erzeugen (vor dem "Nur Heimspiele"-Schalter einfügen)
+  Object.entries(TEAMS).forEach(([key, t]) => {
+    aktiv[key] = true;
+    const b = document.createElement('button');
+    b.className = 'filter'; b.type = 'button';
+    b.setAttribute('aria-pressed', 'true');
+    b.style.setProperty('--c', t.color);
+    b.innerHTML = `<span class="dot"></span>${esc(t.name)}`;
+    b.addEventListener('click', () => {
+      aktiv[key] = !aktiv[key];
+      b.setAttribute('aria-pressed', String(aktiv[key]));
+      render();
+    });
+    controls.insertBefore(b, controls.querySelector('.toggle'));
+  });
+  heimOnly.addEventListener('change', render);
+
+  function render(){
+    // Nach Datum + Zeit sortieren, dann nach Datum gruppieren ("nach Wochen")
+    const sichtbar = SPIELTAGE.filter(st =>
+      aktiv[st.team] && (!heimOnly.checked || istHeim(st))
+    ).sort((a,b) =>
+      a.datum.localeCompare(b.datum) || a.zeit.localeCompare(b.zeit)
+    );
+
+    if (!sichtbar.length){
+      plan.innerHTML = '<p class="empty">Keine Spieltage für die aktuelle Auswahl.</p>';
+      return;
+    }
+
+    const gruppen = {};
+    for (const st of sichtbar) (gruppen[st.datum] ||= []).push(st);
+
+    plan.innerHTML = Object.entries(gruppen).map(([iso, tage]) => {
+      const d = dObj(iso);
+      const karten = tage.map(st => {
+        const t = TEAMS[st.team];
+        const heim = istHeim(st);
+        const gegner = st.spiele.map((g,i) =>
+          `<li><span class="vs">Spiel ${i+1}</span>${esc(g)}</li>`).join('');
+        return `
+          <article class="match" data-team="${st.team}" style="--team:${t.color};--chip-fg:${chipFg(t.color)}">
+            <div class="match__top">
+              <span class="chip">${esc(t.name)}</span>
+              <span class="time">${esc(st.zeit)} Uhr</span>
+              ${heim ? '<span class="heim">Heimspiel</span>' : ''}
+            </div>
+            <ul class="games">${gegner}</ul>
+            <div class="host">Ausrichter: <b>${esc(st.ausrichter)}</b></div>
+          </article>`;
+      }).join('');
+
+      return `
+        <section class="week">
+          <div class="week__date">
+            <span class="week__dow">${fmtDow(d)}</span>
+            <span class="week__dmy">${fmtDmy(d)}</span>
+          </div>
+          <div class="week__matches">${karten}</div>
+        </section>`;
+    }).join('');
+  }
+
+  render();
+</script>
+</body>
+</html>
