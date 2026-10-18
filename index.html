@@ -4,167 +4,118 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TV Mering Volleyball – Saison 2026/27</title>
-
 <!--
-========================================================================
-  BEARBEITEN – so änderst du Termine, Teams und Farben
-========================================================================
-  Alles, was du anpassen musst, steht im <script id="daten"> weiter unten.
-  Der restliche Code (CSS + Anzeige-Logik) muss NICHT angefasst werden.
-
-  1) TEAMS  – Name + Farbe je Mannschaft. Kürzel (D/H1/H2) nicht ändern,
-              sie verbinden Team und Spieltag.
-  2) SPIELTAGE – ein Eintrag pro Spieltag. Felder:
-       datum:      "JJJJ-MM-TT"  (z. B. "2026-10-10") – wird für die
-                   Sortierung genutzt; Wochentag/Format macht die Seite selbst.
-       team:       "D" | "H1" | "H2"
-       zeit:       "11:00"
-       ausrichter: wer den Spieltag ausrichtet. Beginnt der Text mit
-                   "TV Mering", wird der Spieltag automatisch als Heimspiel
-                   markiert.
-       spiele:     Liste der Gegner an diesem Spieltag, z. B.
-                   ["TSV Aichach II", "TSV Aichach III"]
-  3) STAND – das Datum unten im Footer ("stand") einfach überschreiben.
-
-  Neuen Spieltag hinzufügen: eine Zeile { ... } kopieren, Werte ändern,
-  mit Komma abschließen. Reihenfolge egal – es wird nach Datum + Zeit sortiert.
-========================================================================
+  BEARBEITEN: Alles Anpassbare steht im <script id="daten"> weiter unten.
+  TEAMS: Name + Farbe je Mannschaft (Kürzel D/H1/H2 nicht ändern).
+  SPIELTAGE: datum "JJJJ-MM-TT", team, zeit "HH:MM", ausrichter, spiele [Gegner].
+    Beginnt ausrichter mit "TV Mering", wird der Tag als Heimspiel markiert.
+  Vergangene Spieltage (Datum vor heute) rutschen automatisch in den
+  Abschnitt "Vergangene Spieltage" am Ende.
+  STAND: Datum im Footer überschreiben.
 -->
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
-
   :root{
-    --ink:#17202e;
-    --ink-soft:#5a6473;
-    --bg:#f5f7fa;
-    --surface:#ffffff;
-    --line:#e4e8ef;
-    --line-strong:#cfd6e0;
-    --radius:12px;
-    --maxw:960px;
+    --ink:#17202e; --ink-soft:#5a6473; --bg:#f5f7fa; --surface:#fff;
+    --line:#e4e8ef; --line-strong:#cfd6e0; --radius:12px; --maxw:960px;
+    --hero:#17202e;
     box-sizing:border-box;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px);
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --ink:#eef1f6; --ink-soft:#a3adbc; --bg:#11151c; --surface:#181d26;
-      --line:#2a323f; --line-strong:#3a4453;
+      --line:#2a323f; --line-strong:#3a4453; --hero:#0b0e13;
     }
   }
   *{box-sizing:border-box;}
-  html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
-    line-height:1.5; -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:var(--maxw); margin:0 auto; padding:clamp(20px,4vw,44px) clamp(16px,4vw,28px) 64px;}
+  html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,4vw,36px) clamp(16px,4vw,28px) 64px;}
 
-  /* ---------- Kopf ---------- */
-  header{margin-bottom:26px;}
-  .club{
-    font-family:'Space Grotesk',sans-serif; font-weight:500;
-    letter-spacing:.14em; font-size:.82rem; color:var(--ink-soft); margin:0 0 6px;
-  }
-  h1{
-    font-family:'Space Grotesk',sans-serif; font-weight:700;
-    font-size:clamp(1.9rem,6vw,3rem); line-height:1.02; margin:0; letter-spacing:-.01em;
-  }
-  .season{
-    font-family:'Space Grotesk',sans-serif; font-weight:500;
-    font-size:clamp(1.05rem,3.2vw,1.35rem); color:var(--ink-soft); margin:6px 0 0;
-  }
+  header.hero{margin-bottom:22px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+  .hero img{order:2;flex:none;height:clamp(50px,calc(26px + 4.9vw),65px);width:auto;display:block;}
+  .hero .txt{min-width:0;}
+  .club{font-family:'Space Grotesk',sans-serif;font-weight:500;letter-spacing:.14em;font-size:.82rem;color:var(--ink-soft);margin:0 0 6px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.9rem,6vw,3rem);line-height:1.02;margin:0;letter-spacing:-.01em;}
+  .season{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:clamp(1.05rem,3.2vw,1.35rem);color:var(--ink-soft);margin:6px 0 0;}
 
-  /* ---------- Steuerung / Legende ---------- */
-  .controls{
-    position:sticky; top:env(safe-area-inset-top,0px); z-index:5;
-    background:var(--bg); padding:14px 0 12px; margin-top:22px;
-    border-bottom:1px solid var(--line); display:flex; flex-wrap:wrap;
-    gap:8px 8px; align-items:center;
-  }
-  .filter{
-    appearance:none; border:1px solid var(--line-strong); background:var(--surface);
-    color:var(--ink); font:inherit; font-size:.9rem; font-weight:500;
-    padding:7px 13px 7px 11px; border-radius:999px; cursor:pointer;
-    display:inline-flex; align-items:center; gap:8px; transition:opacity .15s, border-color .15s;
-  }
-  .filter .dot{width:12px; height:12px; border-radius:50%; background:var(--c); flex:none;}
+  .controls{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+    padding:14px 0 12px;margin-top:18px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .filter{appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+    font:inherit;font-size:.9rem;font-weight:500;padding:7px 13px 7px 11px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:opacity .15s,border-color .15s;}
+  .filter .dot{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none;}
   .filter[aria-pressed="false"]{opacity:.4;}
-  .filter:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
-  .controls .spacer{flex:1 1 auto;}
+  .filter:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
   .toggle{margin-left:auto;}
 
-  /* ---------- Spieltag-Gruppen (nach Wochen) ---------- */
-  .week{
-    display:grid; grid-template-columns:150px 1fr; gap:18px;
-    padding:22px 0; border-bottom:1px solid var(--line);
-  }
-  .week[hidden]{display:none;}
-  .week__date{position:relative;}
-  .week__dow{
-    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.02rem;
-    display:block;
-  }
-  .week__dmy{color:var(--ink-soft); font-size:.92rem; font-variant-numeric:tabular-nums;}
-  .week__matches{display:flex; flex-direction:column; gap:12px; min-width:0;}
+  .section-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.15rem;
+    margin:38px 0 0;padding-top:14px;border-top:2px solid var(--line-strong);color:var(--ink-soft);}
+  #tabellen{scroll-margin-top:72px;}
+  .week:last-of-type{border-bottom:none;}
+  .past{opacity:.62;}
 
-  /* ---------- Spieltag-Karte ---------- */
-  .match{
-    --team:var(--line-strong);
-    background:var(--surface); border:1px solid var(--line);
-    border-left:5px solid var(--team); border-radius:var(--radius);
-    padding:14px 16px; display:grid; gap:4px 16px;
-    grid-template-columns:auto 1fr; align-items:start;
-  }
-  .match[hidden]{display:none;}
-  .match__top{
-    grid-column:1 / -1; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-    margin-bottom:4px;
-  }
-  .chip{
-    background:var(--team); color:var(--chip-fg,#17202e); font-weight:600; font-size:.82rem;
-    padding:3px 11px; border-radius:999px; white-space:nowrap;
-  }
-  .time{font-variant-numeric:tabular-nums; font-weight:600; font-size:.95rem;}
-  .heim{
-    font-size:.72rem; font-weight:600; letter-spacing:.03em; color:var(--ink);
-    border:1px solid var(--line-strong); padding:2px 8px; border-radius:999px;
-  }
-  .games{grid-column:1 / -1; display:flex; flex-direction:column; gap:2px;}
-  .games li{list-style:none; font-size:1.02rem;}
-  .games ol,.games{margin:0; padding:0;}
-  .games .vs{color:var(--ink-soft); font-size:.86rem; margin-right:6px;}
-  .host{
-    grid-column:1 / -1; margin-top:8px; padding-top:8px; border-top:1px solid var(--line);
-    font-size:.86rem; color:var(--ink-soft);
-  }
-  .host b{color:var(--ink); font-weight:600;}
+  .week{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:22px 0;border-bottom:1px solid var(--line);}
+  .week__dow{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.02rem;display:block;}
+  .week__dmy{color:var(--ink-soft);font-size:.92rem;font-variant-numeric:tabular-nums;}
+  .week__matches{display:flex;flex-direction:column;gap:12px;min-width:0;}
 
-  .empty{padding:40px 0; color:var(--ink-soft); text-align:center;}
-
-  footer{margin-top:34px; font-size:.82rem; color:var(--ink-soft); line-height:1.7;}
+  .match{--team:var(--line-strong);background:var(--surface);border:1px solid var(--line);
+    border-left:5px solid var(--team);border-radius:var(--radius);padding:14px 16px;display:grid;gap:4px 16px;grid-template-columns:auto 1fr;}
+  .match__top{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+  .chip{background:var(--team);color:var(--chip-fg,#17202e);font-weight:600;font-size:.82rem;padding:3px 11px;border-radius:999px;white-space:nowrap;}
+  .time{font-variant-numeric:tabular-nums;font-weight:600;font-size:.95rem;}
+  .heim{font-size:.72rem;font-weight:600;letter-spacing:.03em;border:1px solid var(--line-strong);padding:2px 8px;border-radius:999px;}
+  .games{grid-column:1/-1;display:flex;flex-direction:column;gap:2px;margin:0;padding:0;}
+  .games li{list-style:none;font-size:1.02rem;}
+  .games .vs{color:var(--ink-soft);font-size:.86rem;margin-right:6px;}
+  .host{grid-column:1/-1;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:.86rem;color:var(--ink-soft);}
+  .host b{color:var(--ink);font-weight:600;}
+  .empty{padding:40px 0;color:var(--ink-soft);text-align:center;}
+  .tabellen h3{font-size:1.05rem;margin:22px 0 8px;font-family:'Space Grotesk',sans-serif;}
+  .tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;}
+  .thead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 8px;}
+  .thead h3{margin:0;}
+  .tickrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:16px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .tickrow .lbl{font-weight:600;font-size:.9rem;color:#fff;}
+  .tickrow .tick{font-size:.72rem;padding:4px 10px;}
+  .tickrow .down{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:#fff;text-decoration:none;font-size:1.2rem;line-height:1;padding:2px 6px;}
+  .tickrow .down .dl{font-size:.72rem;font-weight:600;}
+  .tick{background:var(--c);color:#17202e;font-weight:600;font-size:.85rem;padding:6px 12px;border-radius:999px;text-decoration:none;white-space:nowrap;}
+  .tick:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .tabellen iframe{width:100%;height:700px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;}
+  footer{margin-top:34px;font-size:.82rem;color:var(--ink-soft);line-height:1.7;}
   footer a{color:inherit;}
-
   @media (max-width:600px){
-    .week{grid-template-columns:1fr; gap:10px; padding:18px 0;}
-    .week__date{display:flex; align-items:baseline; gap:8px;}
+    .week{grid-template-columns:1fr;gap:10px;padding:18px 0;}
+    .week__date{display:flex;align-items:baseline;gap:8px;}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}html{scroll-behavior:auto;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <header>
-    <p class="club">TV Mering e.&nbsp;V. · Abteilung Volleyball</p>
-    <h1>TV Mering Volleyball</h1>
-    <p class="season">Saison 2026/27</p>
+  <header class="hero">
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iRWJlbmVfNSIgZGF0YS1uYW1lPSJFYmVuZSA1IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MjQuNDQgMTUxLjExIj4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZTllMzMwOwogICAgICB9CgogICAgICAuY2xzLTIgewogICAgICAgIGZpbGw6ICNkZGQ4ZDM7CiAgICAgIH0KCiAgICAgIC5jbHMtMyB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGc+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMjU5LjUsMTI4LjQ3YzIuMzksMS41NywzLDQuMjMsMi4xNiw2LjdzLTMuMjIsMy43Mi01LjgyLDMuN2MtMi45Mi0uMDMtNS41LTEuNzItNS45MS00LjYtLjM5LTIuNjcuNzMtNC45NiwzLjQ4LTYuMDUtMS42Mi0xLjIxLTIuMzItMi43Ny0yLjAzLTQuNzYuNDgtMy4yNyw0LjA1LTQuODIsNy40MS0zLjg5LDIuMTYuNTksMy4zNywyLjUxLDMuNCw0LjY1LjAyLDEuODUtLjc0LDMuMjItMi42OSw0LjI1Wk0yNTkuMzcsMTI0LjQ1YzAtMS40NS0xLjE4LTIuNjMtMi42My0yLjYzcy0yLjYzLDEuMTgtMi42MywyLjYzLDEuMTgsMi42MywyLjYzLDIuNjMsMi42My0xLjE4LDIuNjMtMi42M1pNMjU5LjIyLDEzMy4wN2MwLTEuODEtMS40Ny0zLjI4LTMuMjgtMy4yOHMtMy4yOCwxLjQ3LTMuMjgsMy4yOCwxLjQ3LDMuMjgsMy4yOCwzLjI4LDMuMjgtMS40NywzLjI4LTMuMjhaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTEwNC4xMSwxNDQuMzVjLTEuODYtLjk0LTIuNjYtMi42MS0yLjUxLTQuN2gyLjZjLjE0Ljc3LjMzLDEuNjkuNzEsMi4yLjUyLjY5LDEuNTUuOTIsMi40Mi45MywxLjYxLjAzLDMuMTEtLjc4LDMuMzUtMi4zOWwuMzktMi42OGMtMi4wOSwxLjI5LTQuMTksMS41NC02LjIzLjQ0LTEuNzEtLjkyLTIuNzMtMi45Mi0yLjczLTUuMTEsMC0zLjYzLDIuNzctNi40Niw2LjQzLTYuMzcsMS40MS4wNCwyLjU0LjUxLDMuNjUsMS41NmwuMzQtMS4yOGgyLjY5cy0xLjY2LDEzLjI1LTEuNjYsMTMuMjVjLS4zNCwyLjY3LTIuMzUsNC41OS00Ljk5LDQuODMtMS41LjE0LTMuMDgsMC00LjQ1LS42OVpNMTEyLjAzLDEzMi42OWMuMDQtMS4yNi0uNDMtMi4zNi0xLjIzLTIuOThzLTEuOTktLjg0LTMuMDgtLjU5Yy0xLjM4LjMyLTIuMzMsMS41My0yLjYzLDIuNTktLjQyLDEuNDktLjI0LDIuOTUuODMsMy45OHMyLjcsMS4xMiw0LjA1LjQ0YzEuMDktLjU1LDIuMDEtMS43NywyLjA2LTMuNDNaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTI0Ni42LDEyNC41NWMxLjE2LDYuMTktMS4xOCwxNS4wOC03Ljg1LDE0LjI0LTYuMDgtLjc2LTYuODItMTIuMDItMi4wNi0xNy40MywxLjgxLTIuMDYsNC44LTIuNzksNy4xNi0xLjI0LDEuNDguOTcsMi40MSwyLjY0LDIuNzQsNC40M1pNMjQzLjgsMTMwLjYxYy42Ny0zLjUxLjM2LTguMjktMi4yNS04LjY4LTIuOTYtLjQ0LTQuNjgsMy41NC01LjAzLDYuOTUtLjMxLDMsLjA3LDYuODksMi40NSw3LjM0LDIuNzguNTIsNC4yNS0yLjUxLDQuODQtNS42MVoiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTY1LjczLDEzNy41MWMtMS41NywxLjU3LTMuOTMsMS43NS02LjAzLjcxLTEuODEtLjg5LTIuODgtMi45My0yLjg5LTUuMTctLjAyLTMuMiwyLjA2LTUuOTcsNS4yNi02LjM0LDEuODktLjIyLDMuNDYuMzUsNC44NiwxLjk4bDEuMzMtMTAuODVoMi43N3MtMi41NCwyMC42OS0yLjU0LDIwLjY5bC0yLjcxLjA0LS4wNS0xLjA3Wk0xNjQuMDMsMTM2LjMyYzIuMzYtMSwzLjI2LTQuMSwxLjgzLTYuMDktLjk0LTEuMzEtMi42OC0xLjQ5LTQuMDMtLjkxLTEuMi41Mi0yLjA2LDEuOC0yLjE5LDMuMjUtLjExLDEuMjguMTQsMi41MywxLjEzLDMuMy43Ni41OCwyLjA1Ljk3LDMuMjYuNDVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTIyMi43LDEzOS4zN2wtMi4yMi0xLjYyLDQuMjItNS43Yy0xLjguMTctMy4zNy4wOC00LjgtLjk5LTIuODctMi4xNC0yLjgtNy4yOS4zMS0xMC4wMiwxLjY5LTEuNDgsMy45OS0yLjExLDYuMy0xLjUyLDIuOS43NCw0Ljc4LDMuNTEsNC40Niw2LjU0LS4xOCwxLjY3LS45MSwzLjM0LTEuOTEsNC42OWwtNi4zNyw4LjYyWk0yMjguMjQsMTI1LjVjMC0xLjI5LS41NC0yLjM0LTEuMzgtMi45NXMtMi4wNS0uODItMy4xNy0uNTRjLTEuNDIuMzYtMi40MSwxLjU1LTIuOCwyLjY5LS40NywxLjM2LS40NSwyLjg2LjUxLDMuOTIsMS4xNywxLjMsMy4wMywxLjQ3LDQuNTcuNjcsMS4yNS0uNjUsMi4yOC0xLjk4LDIuMjctMy44WiIvPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xNzguMjksMTM2LjU5YzEuNDMuMiwyLjY2LS4yMywzLjQ4LTEuMzdsMi4wOCwxLjA2Yy0xLjA4LDEuOTUtMy4wOSwyLjczLTUuMjMsMi43LTMuNDEtLjA2LTUuNzgtMi41My01LjctNS45My4wNS0yLjM3LDEuMTYtNC41OCwzLjEtNS42NSwyLjE0LTEuMTgsNC45NC0xLjE0LDYuNzcuNDgsMS42OSwxLjQ5LDIuMSwzLjc3LDEuODUsNS45aC04Ljg5Yy4wNCwxLjQ3LDEuMDIsMi41OSwyLjU0LDIuODFaTTE4MS45MSwxMzEuNTRjLS4yNC0xLjktMS42LTIuNzUtMy4yLTIuNjMtMS4zOC4xLTIuNTQsMS4xNy0yLjc3LDIuNjRoNS45N1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNOTMuNTUsMTM2LjY1YzEuMjQtLjAxLDIuMTctLjYyLDIuOTEtMS40MWwxLjk5LDEuMDRjLTEuMDUsMS45NC0zLjA5LDIuNzMtNS4yMywyLjY5LTMuNDEtLjA3LTUuNzYtMi41NS01LjY5LTUuOTMuMDUtMi4zNiwxLjE2LTQuNTcsMy4xLTUuNjUsMi4wOC0xLjE2LDQuODEtMS4xNCw2LjY0LjM2czIuMjIsMy44NSwyLDYuMDNoLTguOTFjLjA3LDEuNzIsMS4zOCwyLjg4LDMuMiwyLjg3Wk05Ni41MiwxMzEuNTRjLS4yMy0xLjkyLTEuNTktMi43NC0zLjItMi42My0xLjM3LjA5LTIuNTQsMS4xNi0yLjc2LDIuNjNoNS45N1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTQ2LjE1LDEzMS43M2wtLjksNi44MmgtMi43NHMxLjQyLTExLjU5LDEuNDItMTEuNTloMi42NHMuMi44Ny4yLjg3YzEuNDMtMS4xMiwzLjI0LTEuNTQsNC45Ni0uNzIsMS4yOC42MSwxLjk4LDIuMDcsMS44MSwzLjUzbC0uOTIsNy45MmgtMi43NnMuOTMtNy44OC45My03Ljg4Yy4xMi0uOTgtLjU5LTEuNjItMS41MS0xLjY2LTEuNDctLjA2LTIuODksMS4wMi0zLjEyLDIuNzFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTEzNi45MywxMjYuOTdoMi43NXMtLjk5LDcuOTQtLjk5LDcuOTRjLS40MiwzLjM3LTMuOTgsNC41OS03LjE0LDMuNjYtMS43Ni0uNTItMi45OC0yLjItMi43Ni00LjA3bC44Ny03LjU1aDIuNzdzLS45MSw3LjUyLS45MSw3LjUyYy0uMTYsMS4yOS43NywyLjA0LDEuOTYsMi4wOCwxLjM0LjA1LDIuMzItLjY5LDIuNS0yLjA1bC45NS03LjU0WiIvPgogICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iMjA4LjI2IDEzOC41NSAyMTAuMjcgMTIyLjI3IDIwNi41NiAxMjIuMjYgMjA3LjgzIDExOS42IDIxMy40NSAxMTkuNjIgMjExLjEyIDEzOC41NCAyMDguMjYgMTM4LjU1Ii8+CiAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIxOTAuNTIgMTM4LjUzIDE4Ny43NCAxMzguNTcgMTg4Ljg1IDEyOS41OSAxODcuMzIgMTI5LjQ3IDE4Ny42MyAxMjYuOTggMTg5LjE4IDEyNi45IDE4OS44MSAxMjEuNjQgMTkyLjU4IDEyMS42MSAxOTEuOTQgMTI2Ljk2IDE5NC40MiAxMjYuOTcgMTk0LjE0IDEyOS40OCAxOTEuNjIgMTI5LjU0IDE5MC41MiAxMzguNTMiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTIwLjkyLDEzOC41NGgtMi43NXMxLjQxLTExLjU2LDEuNDEtMTEuNTZsMi42LS4wMy4xNy44N2MxLjQ4LTEuMzQsMy4zMy0xLjY0LDQuODktLjI0bC0xLjY5LDIuMjFjLS43MS0uNC0xLjY0LS43LTIuMy0uNDUtLjUyLjItMS4yNCwxLjExLTEuMzMsMS43OGwtLjk5LDcuNDJaIi8+CiAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy0zIiBjeD0iNTcuMjgiIGN5PSIxMzcuMTYiIHI9IjEuNjgiLz4KICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTMiIGN4PSIxMzcuNCIgY3k9IjEyMi45NyIgcj0iMS41MSIvPgogICAgICA8Y2lyY2xlIGNsYXNzPSJjbHMtMyIgY3g9IjEzMi45OCIgY3k9IjEyMi45NyIgcj0iMS41Ii8+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTczLjk1LDE0NC41M2MtMi4xNC0uODktMy4xNC0yLjg1LTIuODMtNC44OWwyLjU2LjAyYy4xMy43Ny4zMiwxLjczLjczLDIuMjIuNTcuNjcsMS41Ni45LDIuNDUuOTEsMS41My4wMiwzLS43MywzLjIzLTIuMjZsLjQ0LTIuODNjLTEuOTUsMS4yNS0zLjk5LDEuNTYtNi4wNC41Ny0xLjczLS44NC0yLjg1LTIuNzktMi45Mi00Ljk3LS4xMi0zLjc2LDIuNy02Ljc1LDYuNDktNi42MywxLjQzLjA1LDIuNTcuNTYsMy41OSwxLjYybC4yNS0xLjM0aDIuNzZzLTEuNjEsMTMtMS42MSwxM2MtLjMsMi40Mi0xLjc4LDQuMzYtNC4xNyw0LjkxLTEuNTkuMzctMy4zNy4zLTQuOTQtLjM1Wk04MS41LDEzMi42OWMuMDUtMS4zMy0uNDgtMi40NS0xLjM1LTMuMDVzLTIuMDItLjc4LTMuMDktLjQ4Yy0xLjMyLjM2LTIuMiwxLjU0LTIuNDgsMi41Mi0uNDMsMS40Ny0uMjcsMi45MS43MiwzLjkzLDEuMDksMS4xMiwyLjc4LDEuMjIsNC4xOS41LDEuMDctLjU1LDEuOTYtMS43NywyLjAyLTMuNDFaIi8+CiAgICAgIDxnPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSI1My44NyAxMTkuNjcgNTYuOTkgMTE5LjY0IDQ2LjE5IDEzOS40OSA0MC4yIDExOS42MyA0My4xMSAxMTkuNjIgNDcuMDEgMTMyLjcgNTMuODcgMTE5LjY3Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMjIuMSwxMzYuNTJjMS41LjM3LDIuOTItLjA3LDMuODgtMS4zMWwyLjAyLDEuMDhjLTEuMDgsMi4wMi0zLjI1LDIuOC01LjUxLDIuNjctMy4yNy0uMTktNS40Ni0yLjYzLTUuMzgtNS45Mi4wNS0yLjMyLDEuMTEtNC41LDMuMDEtNS42LDIuMDQtMS4xOSw0LjgtMS4yLDYuNjUuMjdzMi4zMiwzLjkyLDIuMDIsNi4wN2gtOC44NGMtLjA0LDEuMzQuODcsMi40MiwyLjE1LDIuNzRaTTI2LjA5LDEzMS41MWMtLjM3LTIuMTctMS44MS0yLjc1LTMuNS0yLjU2LTEuMTYuMTMtMi4zMSwxLjI5LTIuNDUsMi42MWw1Ljk2LS4wNVoiLz4KICAgICAgICA8Y2lyY2xlIGNsYXNzPSJjbHMtMyIgY3g9IjMzLjg3IiBjeT0iMTM3LjE3IiByPSIxLjY5Ii8+CiAgICAgIDwvZz4KICAgIDwvZz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xMDcuMzcsMjAuNjFsLTIuMjMsMzUuMTEtMTYuNDYuMDIsMi4xOC0zNS4xMkg0LjIzcy0xLjEtMTQuMDgtMS4xLTE0LjA4aDMwNS42NmMuNjktLjA4LjUzLjE4LjA2LjM3LTYuMzYsMy42OC0xMS45OCw4LjE3LTE2Ljg5LDEzLjYybC0xMy4xNi4wNS0xNzEuNDMuMDRaIi8+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTMzNS43NSwyNC4wN2MtLjMxLDIuMjcsMS4yMiw0LjUyLS4zLDguMDlsLjM5LDIuODFjLS40OSwxLjMyLTEuMjIsMi4zOC0xLjg4LDMuNTVsLTYuMDYsMTAuNzJjLS41My45NC0uOTIsMi4zNi0uNjksMy40LjI5LDEuMzIsMS41OSwyLjQ0LDIuNzcsMi45M2w1LjI2LDIuMmMyLjUyLDEuMDYsNC44NywxLjg0LDcuNjksMS45NSwxLjA4LjA0LDIuNTQuMywzLjQ3Ljc1bDYuOTgsNi45Niw0LjIxLDMuNWMxLjU3LDEuMy45Nyw0Ljc4LDIuMyw3Ljg2bC0xLjY0LDEuNzJjLTEuNDcsMy4zNy0uNjksNi43OC40NywxMC4wOS45NCwyLjY4Ljk5LDUuNTYsMS4zMiw4LjQxbC0xLjExLDIuNDMtMy4xMi0uNzQtNS4yOS0xLjM2Yy0zLjE3LS44MS02LjM3LTEuMjEtOS40My0yLjMyLjAzLTEuNjEtLjU1LTIuOTctLjgxLTQuNTRsLS4zMS0xLjg1Yy0xLjE3LS44OS0zLjA2LTEuMTEtNC40LS40MWwtMy42MywxLjljLTMuNDEsMS43OS01Ljk5Ljk0LTguMDYsMi4yNS0xLjcsMS4wOC0zLjE2LDIuNDMtNC4zOCw0LjAyLS43LjkxLS45NiwyLjI4LS45NCwzLjQ1LDAsLjYyLDEuMTMsMS41NCwxLjc0LDEuNTMsMi4zNC0uODcsNC41OC0xLjA0LDcuMDEtMS4xMmw1LjUtLjE4YzEuMjItLjA0LDIuMTQuNDMsMi42NSwxLjUxLjE4LjM5LDEuMDkuNzMsMS40OS41OHMuNi0uOTYuNjUtMS42OWMzLjE3LjEyLDYuMDcsMS4zOCw4LjgsMi44NWw3LjAzLDMuNzcsNC4wNSwyLjU2Yy0uMzEuOTYtLjYsMS43Ni0xLjEyLDIuNTQtLjczLjIxLTIuMDUuMjktMi44OS4yMy0yLjYtLjE4LTQuODcuMjItNy4yNywxLjA1bC0xMS4zOSwzLjk0LTIuNzguNzFjLS43Ny0xLjg1LTIuMjItMy4yMy0zLjktNC4wMmwtLjc2LS42NGMtLjY0LS41NS0yLjgzLDEuNS0zLjk0LDQuMTVsLTQuMzMsMTAuMzZjLTIwLjg1LTEyLjA0LTMzLjQzLTM0LjI2LTMzLjIxLTU4LjE3LjIyLTIzLjc4LDEzLjI3LTQ1Ljc5LDM0LjMtNTcuNDMsMTEuNTItNi4zNCwyNC43Mi05LjE2LDM4LjE5LTcuOTItMS40MSwxLjUxLTIuMTYsMy4yNS0yLjA5LDUuMjYuMTUsMy44MSwyLjk0LDYuNDEsNi42OCw2LjYzLDIuOS4xNiw1LjQ5LTEuMTcsNi41LTQuMDIuNjUtMS44NC41NC0zLjc1LS4wNC01Ljg5LDIyLjM3LDYuMDMsMzkuOTgsMjMuMzYsNDYuNDMsNDUuNDhsLTUuMjYtLjIzYy0xLjE1LS4wNS0xLjgyLS4yNC0zLjA0LjE5LTEuNy42LTMuNzguNjktNS42Ni43bC03LjQ3LjAzLTQuNTQtLjYzLTUuMzkuMTFjLTMuNjEtMi4zMy03LjAyLS4xOC05Ljg1LTMuMTMtMS40OC0xLjU0LTMuMzYtMi4zNi01LjQ5LTIuNDNsLTYuNjQtLjIxYy0uODUtLjAzLTEuMzYtMi4wMy0uODgtMi42NmwxLjgxLTIuNGMuMzctLjUuMjctMS40OS0uMTMtMi4wNWwtMi4zNi0zLjI5LjM4LTEuMTRjLjI0LS43LTIuNDgtLjU2LTMuMTMtMS43LS45Mi0xLjYyLTIuMjItMi41My00LjA3LTIuNjctLjc0LS45MS0xLjgzLTEuMjItMi45My0uODItNC4xOC40OC02Ljc5LDUuNzEtNy4yMiw5Ljg3LS4xMiwxLjEzLjU1LDEuOTUsMS4xOSwyLjczbDEuNDMsMS43MmMxLjgzLjksMy42MywxLjQ4LDUuNywyLjA2LjE0LjQyLjIyLDEuNjctLjEyLDIuMDgtMS4yMywxLjQ5LTQuODIuMDYtOC4xNSwxLjM4LTIuOTYtLjkyLTUuNzYtMS40OS05LjA0LTEuMzZsLjgyLTMuNjguNTMtMy4wMWMxLjEtMi40NywyLjE2LTQuODksMy44Ny02Ljk1bDIuOTQtMy41NWMtLjI2LS45My0uMy0xLjczLS4wNi0yLjU5bDEuMzYtNC45OC0uNTYtLjk5Yy0uMTQtLjI1LS45MS41MS0uOTkuNjhsLS4yOS0xLjM5Yy0uMDYtLjMtLjk0LS41NC0xLjE1LS4zM2wtMS4xNiwzLjEzYy0uODMtMS4zMy0uMDItMi43NC0uNDItMy44Ni0uMDgtLjI0LTEuMTItLjI3LTEuNDIsMi4xNWwtLjMyLDIuNTljLS4wMS4xMS0uMzkuNDUtLjQ2LjM4cy0uMjYtLjMtLjI4LS40MmwtLjctMy4yMmMtLjAyLS4xLS4zNC0uMzYtLjQ0LS4zOC0uMTUtLjAzLS41NS4yOS0uNTcuNDRaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMzc2LjMyLDkwLjc1Yy4xNi0yLjE1LS4yMi00LjEzLS40Ny02LjEyczEuNDQtMS4zOCwzLjE0LTIuNjNjMS4xNS0uODQtMS41My00Ljc0LTEuOTItNy40Ni0uMjctMS44OC4xLTMuNzQtLjgtNS41My0uMjktLjU3LTEuMDQtMS40OC0xLjE4LTIuMWwtMS43My03Ljc0LDQuMzMuNTdjMS43NC4yMywzLjU1LS4yNCw1LjIzLjI2LDIuMDQuNjIsNC4wMywxLjE4LDYuMi45OWwzLjY5LS4zMywxMi43Mi0yLjEyLDEuOTIuOTVjMi40Mi0uODgsMy42Mi45NCw0Ljc2LS40NGwtMS4zNi0xLjEsMy4xMi0uNTRjLjU4LTEuMjYsMS43NC0uNzIsMi4zOS0xLjc5LDcuOTIsMzAuMS02LjExLDYxLjU2LTMzLjY4LDc1Ljg1LTE4LjMsOS40OC00MC4yNCw5Ljg5LTU5LjA0LjkyLjg5LTEuMDYsMS44OC0xLjc3LDIuOTYtMi40NWwyLjM4LTEuNTFjLjc3LS40OSwyLjM0LS4yMSwzLjM1LS4yMy4zMy0uMjMuMzctMS4wNS4yNi0xLjdsMi4zNC0xLjE2YzMuMzUtLjkxLDYuNjctMS4yLDEwLjEtMS43bDUuODEtLjg1LDkuODQtLjA2YzIuMDItLjAxLDIuODctMS4zMywzLjY2LTMuMDRsMS42NC0zLjU3LDEuNjUtLjA2YzIuMTctLjA4LDMuNTYtMi4xMSwzLjg5LTQuMDZsMS4wOC02LjMxYy4wNS0uMjkuNTQtLjY5LjkzLS44N2wuNDUtMy40OGMuMjUtMS45Mi0uMTYtMy45OC40NS01Ljg1LjUtMS41MywxLjc1LTIuODcsMS44OC00LjcyWiIvPgogICAgICA8L2c+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTExNS4wOCw4OS45MWwtLjExLTEyLjc5LTIuNzMsOS4xLTcuNTcsMjEuMTctMy44OC4wMy01LjMyLTIzLjU5LTEuMTgtNy4xNi0uOTIsNy40Ni0zLjc3LDIzLjI3aC03LjAyczcuNzktMzkuODEsNy43OS0zOS44MWg3LjUyczQuMDQsMTguMzcsNC4wNCwxOC4zN2wxLjQ1LDkuNzZjLjgtMy41NiwxLjctNi45MywyLjk4LTEwLjQxbDYuMDctMTcuNzNoNy43OXMyLjE4LDM5LjgzLDIuMTgsMzkuODNoLTYuNjlzLS42LTE3LjUtLjYtMTcuNVoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0yNjAuNiw5My41NmgtNy45OHMuNDYtNy4wMS40Ni03LjAxaDE1LjMzYy0uMDksOC4xOS0yLDE2LjY1LTkuNTcsMjAuNTYtOS4yOCwzLjY5LTE5LjMxLS4xNS0yMi44MS05LjY2LTIuNzEtNy4zNy0yLjA2LTE1LjYzLDEuNzMtMjIuNDIsMy4wOS01LjUzLDguNjMtOC41OSwxNC45NC04LjMxLDYuMDQtLjE0LDExLjMxLDIuOTksMTQuMTEsOC40MmwtNS4zLDQuNjFjLTEuMjgtMi4yLTIuNzktNC4wMy01LjA2LTUuMTItMy45MS0xLjg3LTguNDYtLjc5LTExLjI1LDIuNTEtNC4wMiw0Ljc1LTQuNjYsMTIuNjctMi4yMiwxOC4xMSwyLjIsNC45MSw3LjgsNy40MSwxMi43NCw1LjA5LDIuNjktMS4yNyw0LjE0LTMuOTksNC44Ni02Ljc4WiIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTE3OC4wNSwxMDcuMjlsLTcuNzIuMTUtNy42Ni0xNy45Ni0xLjI4LDE3LjkzaC03LjEzczIuNy0zOS44MywyLjctMzkuODNsMTAuOTkuMTNjNC4xNi4wNSw3LjU1LDIuNzIsOC45NSw2LjYyLDEuOTUsNi42Mi0uMDYsMTMuNDQtNy4yMiwxNS4yN2w4LjM2LDE3LjdaTTE3MC4xMyw3Ni44Yy0uOC0yLjUtMy43OS0yLjY0LTYuNTItMi41NmwtLjcsMTAuNTVjMS41NS4wMiwzLjExLS4wNiw0LjY1LS40LDMuMDktLjY4LDMuNTUtNC41NywyLjU4LTcuNTlaIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjE0OC42MSA5MC40NCAxMzUuNTUgOTAuNDUgMTM0Ljg3IDEwMC4zNyAxNDcuOTUgMTAwLjM4IDE0Ny40NCAxMDcuNDEgMTI3LjM1IDEwNy40MSAxMzAuMDUgNjcuNTcgMTUwLjEyIDY3LjU2IDE0OS43MSA3NC42MyAxMzYuNjMgNzQuNjQgMTM2LjAzIDgzLjU0IDE0OS4wNSA4My41NCAxNDguNjEgOTAuNDQiLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iMTg4Ljk5IDEwNy40IDE4MS44NyAxMDcuNDEgMTg0LjU1IDY3LjU4IDE5MS42NyA2Ny41NyAxODguOTkgMTA3LjQiLz4KICAgICAgICA8Zz4KICAgICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTIyNy4xOCwxMDcuNDFoLTYuODlzLTE0LjAxLTI1LjcyLTE0LjAxLTI1LjcybC0xLjU4LTMuMzItLjA3LDYuOTctMS42NSwyMi4wNi02LjYxLjAyLDIuNy0zOS44Niw3LjM5LjAyLDEyLjI2LDIyLjIxLDIuODIsNS44MS40LTEwLjAzLDEuMjgtMThoNi42N3MtMi43MiwzOS44My0yLjcyLDM5LjgzWk0yMDQuNjIsNzguMTVsLS4xMi4xMi4xMi4xMi4xMi0uMTItLjEyLS4xMloiLz4KICAgICAgICAgIDxyZWN0IGNsYXNzPSJjbHMtMyIgeD0iMjA0LjUzIiB5PSI3OC4xOSIgd2lkdGg9Ii4xNyIgaGVpZ2h0PSIuMTciIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQuNjEgMTY3LjY2KSByb3RhdGUoLTQ1LjAxKSIvPgogICAgICAgIDwvZz4KICAgICAgPC9nPgogICAgICA8Zz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iMjY5LjQzIDU1LjcyIDI2NS4yMiA1NS43NCAyNTYuODEgNDAuMjcgMjU1LjgxIDM4LjIgMjU1LjY1IDQzLjQ0IDI1NC43NCA1NS43MyAyNTAuNyA1NS43MyAyNTIuMzUgMzEuNTMgMjU2Ljg0IDMxLjUxIDI2NC41NCA0NS40NSAyNjUuOTUgNDguMzcgMjY2LjIzIDQyLjY1IDI2Ny4wMSAzMS41MyAyNzEuMDkgMzEuNTMgMjY5LjQzIDU1LjcyIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjE2OS4xNyA1NS43MSAxNjQuOTcgNTUuNzQgMTU2Ljg4IDQwLjkgMTU1LjU2IDM4LjIgMTU1LjI2IDQ1LjMxIDE1NC40NyA1NS43MyAxNTAuNDQgNTUuNzIgMTUyLjA4IDMxLjUzIDE1Ni41NyAzMS41MSAxNjQuMjYgNDUuNDUgMTY1LjY4IDQ4LjM2IDE2NS45NyA0Mi42NSAxNjYuNzQgMzEuNTMgMTcwLjgyIDMxLjUzIDE2OS4xNyA1NS43MSIvPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTEzMS4wNSwzMS41M2wtMS4wOSwxNS43NGMtLjExLDEuNjEtLjUsMy4yMy0xLjEyLDQuNjUtMS42OCwzLjkxLTUuNTYsNC45My05LjczLDQuMzUtNS4xMS0uNzEtNi4zNi01LjUxLTYuMDQtMTAuNDlsLjkzLTE0LjI0aDQuMzRzLTEuMDEsMTQuOTYtMS4wMSwxNC45NmMtLjEsMS40OC4yMSwzLjE5LDEsNC4zMy44OSwxLjI4LDIuNCwxLjU0LDMuOTIsMS4yMiwxLjE2LS4yNCwyLjUzLTEuMjUsMi44MS0yLjc1bC43My00LjAxLjk3LTEzLjc0aDQuMjlaIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjIzOC40MSA0NS40MiAyMzAuNDggNDUuNDIgMjMwLjA2IDUxLjQzIDIzOC4wMSA1MS40MyAyMzcuNyA1NS43MyAyMjUuNDggNTUuNzMgMjI3LjEyIDMxLjU0IDIzOS4zMiAzMS41MyAyMzkuMDcgMzUuODQgMjMxLjEyIDM1Ljg0IDIzMC43NyA0MS4yMSAyMzguNjkgNDEuMjMgMjM4LjQxIDQ1LjQyIi8+CiAgICAgICAgPHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjIwNS4zOCA0NS40IDE5Ny40NSA0NS40MyAxOTcuMDMgNTEuNDMgMjA0Ljk3IDUxLjQzIDIwNC42NyA1NS43MyAxOTIuNDUgNTUuNzMgMTk0LjA5IDMxLjUzIDIwNi4zMSAzMS41MyAyMDYuMDQgMzUuODQgMTk4LjExIDM1Ljg0IDE5Ny43MyA0MS4yMiAyMDUuNjQgNDEuMjIgMjA1LjM4IDQ1LjQiLz4KICAgICAgICA8cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iMTg3LjcyIDMxLjUzIDE5Mi40NiAzMS41NSAxODIuNjkgNTUuNzEgMTc4LjQ4IDU1LjcyIDE3MS45NyAzMS41NCAxNzYuNTEgMzEuNTMgMTgxLjEgNDkuNzEgMTgxLjk1IDQ2LjcxIDE4Ny43MiAzMS41MyIvPgogICAgICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMyIgcG9pbnRzPSIyNDYuMjMgNTUuNzIgMjQxLjg5IDU1LjcyIDI0My41MiAzMS41MyAyNDcuODYgMzEuNTMgMjQ2LjIzIDU1LjcyIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMTQ4LjIyLDU1LjY4bC00Ljc0LjA2LTQuNjItMTAuOC0uNzcsMTAuNzloLTQuMzVzMS42NC0yNC4yLDEuNjQtMjQuMmw2LjI2LjAzYzMuNzguMDMsNi4yNSwyLjg4LDYuMzMsNi41NS4wNywzLjI0LTEuNTYsNi4wMi00LjgyLDYuODJsNS4wNywxMC43NFpNMTQyLjk5LDQwLjk3YzEuMDEtMS4yMS45LTMuNjQtLjItNC42OC0uODctLjgyLTIuMzEtLjctMy4zNi0uNjhsLS40MSw2LjM1YzEuMzItLjAxLDIuOTcuMjIsMy45Ny0uOTlaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0zIiBkPSJNMjIzLjI4LDU1LjY4bC00LjczLjA2LTQuNjQtMTAuODQtLjc4LDEwLjg0aC00LjM0czEuNjQtMjQuMjEsMS42NC0yNC4yMWw2LjA2LjAzYzMuODYtLjA3LDYuNDUsMi43OSw2LjUyLDYuNTUuMDYsMy4yMy0xLjUyLDYuMDItNC44Miw2LjgzbDUuMDgsMTAuNzRaTTIxNy45NSw0MS4wN2MxLjExLTEuMTgsMS4wMS0zLjY3LS4xLTQuNzctLjg0LS44My0yLjI4LS43MS0zLjM3LS43bC0uNDEsNi4zNmMxLjMtLjAxLDIuODcuMTksMy44OS0uODlaIi8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik03LjIxLDQ0Ljk4aDEwLjMzbC4yMSw1LjYyLDkuMTctLjMxLjA3LTUuNTIsOS42NC0uMjJ2NS43NGw5LjEyLjMxLjIzLTYuMDZoOS44djYuMDZsOS4xMy0uMzEuMDUtNS41Miw5LjYzLS4yMi0yLjIyLDMyLjQ0LS40Myw1LjQ1cy0xLjEsMy4xMS0xLjA5LDMuMjgtMi43OCw2LTIuNzgsNmwtNC41Nyw1Ljk1LTUuMzYsNC4zOS00Ljg4LDIuNTYtNS44OSwyLTgsLjIyLTUuNDQtLjkzLTYuMzQtMi41Ny02LjA5LTMuMTEtNC4yOC00LjA2LTIuMjktMy42Ny0zLTUuMjItMS4zNS01Ljk0LTEuMTEtNS4yMy0xLjI4LTE4Ljc4LS45OC0xMi4zNFoiLz4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTYuMjcsMzIuMjhjLS4wNC4xOS45NiwxMi42OS45NiwxMi42OWgxMC4zM2wuMjEsNS42Miw5LjE3LS4zMS4wNy01LjUyLDkuNjQtLjIydjUuNzRsOS4xMi4zMS4yMy02LjA2aDkuOHY2LjA2bDkuMTMtLjMxLjA1LTUuNTIsOS42My0uMjIuNjUtMTIuMjZINi4yN1oiLz4KICAgIDxwb2x5Z29uIGNsYXNzPSJjbHMtMSIgcG9pbnRzPSIzOS4yIDYxLjY3IDM3LjMxIDY0Ljk0IDM3LjU3IDc1LjQzIDQ0LjgyIDc0LjMgNDQuNjggNjQuMDEgNDEuODYgNjEuOSAzOS4yIDYxLjY3Ii8+CiAgICA8cGF0aCBkPSJNNi4xNywzMS4zOWMtLjI3LDAtMS4wNSwwLTEuMDUsMCwwLDAsLjA1LjcuMDcsMS4wMWwzLjYyLDQ0LjUzYy4zMiwzLjk5LDEuMDYsNy42LDIuNjksMTEuMjcsMyw2Ljc2LDguMjYsMTIuNTMsMTQuODEsMTUuOTUsNy43MSw0LjAzLDE2LjI1LDQuNjMsMjQuNTgsMi4xLDQuMzktMS4zNCw4LjAzLTMuMzIsMTEuMzMtNi4zLDEuNzctMS41OSwzLjMyLTMuMTgsNC42NC01LjIxLDMuNzItNC43OSw2LjAzLTEwLjQyLDYuNDItMTYuNmwyLjk3LTQ2LjczLTcwLjEtLjAyWk03LjIzLDMzLjI1aDY2Ljg0cy0uNjQsMTAuOTMtLjY0LDEwLjkzbC04LjkyLjAydjUuODJzLTguMjItLjAyLTguMjItLjAydi01Ljczcy0xMC44NCwwLTEwLjg0LDB2NS43NHMtOC4zNCwwLTguMzQsMGwtLjAyLTUuNzhoLTEwLjQ0cy0uMDIsNS43Ny0uMDIsNS43N2gtOC4zNHMtLjAxLTUuODEtLjAxLTUuODFoLTEwLjIzcy0uODItMTAuOTUtLjgyLTEwLjk1Wk01NC4xMiw3Ni43Nmw2LjcxLS4wNS0uMDMsNS43Ni0yLjYtLjAyYy0uMjgsMC0uMzUuMDEtLjYzLS4yTTQ5LjkxLDcwLjM4bDYuMDgtLjA3LjAyLDUuOGMtLjk4LjAxLTIuMjcsMC0yLjI3LDBNMzcuNDksOTQuODdjMS43Mi0zLjc1LDMuMjMtNy43MywzLjE0LTExLjkybC0uMDktNC4yLDIuMTktLjU2YzIuOTQsNy40OCwyLjIsMTcuMjUtMS43NSwyNC41Mi0uOTctMi4yMS0xLjcyLTQuMi0zLjE2LTUuOTEtLjQ5LS41OC0uNzEtMS4yLS4zNC0xLjkzWk00OC4zNCw3Ni4zN2MtLjA2LjE2LS41NS4xNC0uNzEuMDUtMS44OC0xLjA2LTEyLjg5LDMuNDYtMTIuNzIuNDMsMC0uMTYuNDktLjU2LjY5LS41NCwxLjUyLjE4LDQuMDIsMCw1LjctLjU0LDIuMzktLjc3LDMuOS0xLjE3LDYuMjctLjQzLDAsMCwuNDcuMDkuNy40NCwwLDAsLjEzLjE1LjEuNDcsMCwwLDAsLjEtLjAzLjEzWk0xMy40NCw2NC4wMWg4LjY3djUuNzRoLTguNjd2LTUuNzRaTTkuNTUsNjMuMzRsLS40My01LjgxaDguMDJzLS4wMSw1Ljc5LS4wMSw1Ljc5bC03LjU4LjAyWk0zMS4xMiw2NC4wMXY1Ljc0cy04LjMzLDAtOC4zMywwdi01Ljc0czguMzMsMCw4LjMzLDBaTTI3LjQ2LDU3LjUzaDcuNjhzMCw1Ljg2LDAsNS44NmgtNy42OHMwLTUuODYsMC01Ljg2Wk0xNy43OCw2My4zOXYtNS44NnM5LjIsMCw5LjIsMHY1Ljg2cy05LjIsMC05LjIsMFpNMTcuOTEsNzAuNGg5LjExcy0uMDEsNS42Ni0uMDEsNS42NmgtMi42NnMtNi40NS4wNS02LjQ1LjA1di01LjcxWk0yMi4yNCw3Ni43MnY1Ljc2cy04LjgsMC04LjgsMHYtNS43NnM4LjgsMCw4LjgsMFpNMjUuMTYsODMuMWwtMy4zNyw1LjY4LTMuODguMDUtLjAyLTUuNzQsNy4yNy4wMlpNMjIuOSw4Mi40OHYtNS43N3M2LjE0LjA3LDYuMTQuMDdsLTMuNDMsNS42Ny0yLjcxLjAzWk0yNy42Miw3Ni4xMnYtNS43NnM1LjE5LjAzLDUuMTkuMDNsLTMuMzYsNS43M2gtMS44M1pNMzEuNjksNjkuNzl2LTUuOHM0Ljk3LjA0LDQuOTcuMDRsLTMuNTMsNS43OGgtMS40M1pNNDEuNTUsNTcuNTNoNS4xM3MtLjAzLDUuODUtLjAzLDUuODVoLTEuMzdNNDAuMDEsNzQuMThjLS4wNy0uMDktLjE2LS40NC0uMTgtLjU1LS4wMi0uMDctLjAyLS4xMy0uMDItLjIuMDItMi4zNS0uMDUtNC45OS0uNjItNy4yNS0uMDUtLjE5LS4xNi0uMzUtLjMxLS40N2wtLjYxLS40OGMtLjIxLS4xNi4yMi0uODYuNDQtMS4wNCwxLjMyLTEuMDcsMy4xNy0xLjI1LDQuNzItLjMzLjIuMTIuMjIuNDEuMDQuNTZsLS40OS40NGMtLjI4LjI1LS40NS42MS0uNDcuOTgtLjEyLDIuNjEtLjA3LDUuMS4xNyw3LjcxLjAyLjIyLS4wNS4zNy0uMjkuNTItLjY3LjQzLTEuMjYuNjItMS43Mi41NS0uMy0uMDUtLjQ2LS4xOS0uNjUtLjQ1Wk0zNy4wMyw2My4zOWgtMS4zMnYtNS44N3M0Ljg5LjA1LDQuODkuMDVsLTMuNTcsNS44M1pNNDUuNzgsNjQuMDVsNS44Ny0uMDh2NS44cy0yLjE0LDAtMi4xNCwwTTYxLjA5LDY0LjAxbC0uMDIsNS43My04Ljc4LjAzLjAyLTUuNzZoOC43OFpNNTYuNTUsNjMuMzl2LTUuODZzOS4zNywwLDkuMzcsMHY1Ljg0cy05LjM3LjAxLTkuMzcuMDFaTTQ3LjMsNjMuMzh2LTUuODNzOC41Ni0uMDIsOC41Ni0uMDJsLjAzLDUuODZoLTguNThaTTY1LjYsODMuMDhsLS4wMiw1Ljc0LTMuODEtLjA0LTMuNi01LjY4LDcuNDQtLjAyWk02MS40Nyw4Mi40NnYtNS43NGg4LjAxdjUuNzRoLTguMDFaTTY1LjYsNzYuMTFoLTguOTZ2LTUuNzJoOC45NnY1LjcyWk02MS43Niw2OS43NHYtNS43NHM4LjI1LDAsOC4yNSwwdjUuNzRzLTguMjUuMDEtOC4yNS4wMVpNNjYuNTgsNjMuMzR2LTUuOHM2LjIzLDAsNi4yMywwbC0uMzksNS44MWgtNS44NFpNNzIuNCw2NC4wMmwtLjM5LDUuNzdoLTEuMzJzLS4wMi01LjgtLjAyLTUuOGwxLjczLjAzWk03Mi44Niw1Ni45SDkuMDNsLS4wOC0xLjA1aDYzLjk0bC0uMDMsMS4wNVpNOS40OSw2NC4wMWgzLjMxczAsNS43NiwwLDUuNzZsLTIuNzUtLjAzTTE3LjIzLDcwLjM2djUuNjZzLTYuNTUuMDYtNi41NS4wNmwtLjU0LTUuNzJoNy4xWk0xMC43NSw3Ni43MWgyLjA1czAsNS43MiwwLDUuNzJsLTEuMjYtLjAyYy0uMDktLjE2LS4yOS0uODctLjc3LTUuNU0xMS43LDgzLjA5aDUuNTNzMCw1LjcsMCw1LjdsLTMuMjguMDRNNTQuMTEsMTAzLjA5Yy03LjI0LDMuNC0xNSwzLjYyLTIyLjU1LDEuMTYtNy41Mi0yLjQ1LTEzLjY2LTcuMy0xNy4yMi0xNC43NWw2Ljk4LS4wMy0yLjkyLDUuMDJjMi45NCwzLjU2LDYuNDksNi4zNCwxMC42Nyw4LjE2bDQuODYsMS42MmMxLjg5LjYzLDMuOTguOCw2LjAyLjg3LDQuMDguMTUsOC4yNS0uNDksMTIuMTQtMi4wMWw0LjIyLTIuMTZjMy40LTEuNzQsNi4xMi00LjM5LDguNDgtNy40NGwtMi40Ny00LjEyaDUuNzhjLTIuOTYsNi4xOS03LjksMTAuODEtMTMuOTksMTMuNjdaTTY4LjY1LDg4Ljc1bC0yLjQuMDZ2LTUuNzNzNC41My4wMSw0LjUzLjAxbC0yLjEzLDUuNjZaTTcwLjksODIuNDdoLS43OXMtLjAxLTUuNzQtLjAxLTUuNzRsMS41OC4wNmMtLjE4LDIuOTctLjI2LDMuOTctLjc4LDUuNjhaTTcxLjc0LDc2LjA2bC01LjQ5LjA2di01LjczczUuNzMsMCw1LjczLDBNNzIuODgsNTUuMzdIMTEuNjhzLTIuNzMtLjAxLTIuNzMtLjAxbC0uNzQtOS45OSw4Ljk1LS4wMnY1LjYzczEwLjU1LjAxLDEwLjU1LjAxdi01Ljc4czguMzUtLjAyLDguMzUtLjAybC4wMyw1Ljc5aDEwLjQzcy0uMDItNS43Ny0uMDItNS43N2g4Ljc1czAsNS43NywwLDUuNzdoMTAuM3MwLTUuNzYsMC01Ljc2aDcuOTVzLS42MSwxMC4xNC0uNjEsMTAuMTRaIi8+CiAgPC9nPgo8L3N2Zz4=" alt="TV Mering Volleyball">
+    <div class="txt">
+      <p class="club">TV Mering e.&nbsp;V. · Abteilung Volleyball</p>
+      <h1>Spieltage TV Mering</h1>
+      <p class="season">Saison 2026/27</p>
+    </div>
   </header>
 
+  <div class="tickrow">
+    <span class="lbl">BVV Ticker:</span>
+    <a class="tick" style="--c:#C9A0DC" href="https://bvv.sams-ticker.de/matchseries/574ecb03-8411-4150-a5c9-d6d85d155279" target="_blank" rel="noopener">Damen ↗</a>
+    <a class="tick" style="--c:#49ACF2" href="https://bvv.sams-ticker.de/matchseries/d0233b13-b249-4c2b-9619-ecb54f2383df" target="_blank" rel="noopener">Herren 1 ↗</a>
+    <a class="tick" style="--c:#7BA388" href="https://bvv.sams-ticker.de/matchseries/391ff49d-a207-41a7-aa88-245e5cc8bd1c" target="_blank" rel="noopener">Herren 2 ↗</a>
+    <a class="down" href="#tabellen" aria-label="Zu den Tabellen" title="Zu den Tabellen"><span class="dl">Tabellen</span><span aria-hidden="true">↓</span></a>
+  </div>
+
   <div class="controls" id="controls">
-    <!-- Filter-Chips werden erzeugt -->
     <label class="filter toggle" style="--c:transparent">
       <input type="checkbox" id="heimOnly" style="margin:0"> Nur Heimspiele
     </label>
@@ -172,8 +123,17 @@
 
   <main id="plan"><p class="empty">Wird geladen …</p></main>
 
+  <section class="tabellen" id="tabellen">
+    <h2 class="section-title">Tabellen</h2>
+    <div class="tgrid">
+      <div><div class="thead"><h3>Herren 1</h3></div><iframe loading="lazy" title="Tabelle Herren 1" src="https://www.volley.de/halle/erg/qp/orga-25/saison-2026/bereich-1000/wid-44600/wsid-1/template-einbetten"></iframe></div>
+      <div><div class="thead"><h3>Herren 2</h3></div><iframe loading="lazy" title="Tabelle Herren 2" src="https://www.volley.de/halle/erg/qp/orga-25/saison-2026/bereich-1000/wid-44607/wsid-1/template-einbetten"></iframe></div>
+      <div><div class="thead"><h3>Damen</h3></div><iframe loading="lazy" title="Tabelle Damen" src="https://www.volley.de/halle/erg/qp/orga-25/saison-2026/bereich-1000/wid-44619/wsid-1/template-einbetten"></iframe></div>
+    </div>
+  </section>
+
   <footer>
-    <p>Stand: <span id="stand">22.09.2026</span>. Alle Angaben aus dem
+    <p>Stand: <span id="stand">18.10.2026</span>. Alle Angaben aus dem
        <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben" target="_blank" rel="noopener">BVV-Spielplan</a>.</p>
     <p>Quellen:
        <a href="https://volleyball.bayern/ergebnisse/erwachsene/schwaben/team-88895" target="_blank" rel="noopener">Damen</a> ·
@@ -183,16 +143,9 @@
   </footer>
 </div>
 
-<!-- ==================================================================
-     DATEN – hier bearbeiten (siehe Anleitung ganz oben)
-     ================================================================== -->
 <script id="daten">
   const TEAMS = {
-    // Alte Farben (bis 22.09.2026):
-    // D:  { name: "Damen",    color: "#B5BAFF" },
-    // H1: { name: "Herren 1", color: "#B4E1EB" },
-    // H2: { name: "Herren 2", color: "#78A4CB" },
-    D:  { name: "Damen",    color: "#C9A0DC" }, // Flieder (vorher #8C0343 Bordeaux)
+    D:  { name: "Damen",    color: "#C9A0DC" },
     H1: { name: "Herren 1", color: "#49ACF2" },
     H2: { name: "Herren 2", color: "#7BA388" },
   };
@@ -219,7 +172,8 @@
     { datum:"2027-03-13", team:"H1", zeit:"13:00", ausrichter:"TV Mering",                spiele:["SSV Bobingen","VfL Großkötz"] },
 
     // ---- Herren 2 ----
-    { datum:"2026-10-17", team:"H2", zeit:"13:00", ausrichter:"TSV Aichach II",           spiele:["TSV Aichach II","TSV Aichach III"] },
+    // 17.10.: 12:00 Uhr (manuell angepasst; im BVV-Spielplan steht 13:00)
+    { datum:"2026-10-17", team:"H2", zeit:"12:00", ausrichter:"TSV Aichach II",           spiele:["TSV Aichach II","TSV Aichach III"] },
     { datum:"2026-11-14", team:"H2", zeit:"13:30", ausrichter:"TSV Gersthofen II",        spiele:["TSV Gersthofen II","TSV Aichach III"] },
     { datum:"2026-11-28", team:"H2", zeit:"11:00", ausrichter:"TSV Nördlingen II",        spiele:["TSV Nördlingen II","TSV Friedberg IV"] },
     { datum:"2026-12-05", team:"H2", zeit:"13:00", ausrichter:"TSV Friedberg IV",         spiele:["TSV Friedberg IV","TSV Gersthofen II"] },
@@ -228,19 +182,14 @@
   ];
 </script>
 
-<!-- ==================================================================
-     ANZEIGE-LOGIK – muss normalerweise nicht bearbeitet werden
-     ================================================================== -->
 <script>
   const plan = document.getElementById('plan');
   const controls = document.getElementById('controls');
   const heimOnly = document.getElementById('heimOnly');
-  const aktiv = {}; // Team-Kürzel -> an/aus
+  const aktiv = {};
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const istHeim = st => /^tv mering/i.test(st.ausrichter.trim());
-  // Wählt automatisch dunklen oder weißen Text, je nachdem was auf der
-  // Team-Farbe besser lesbar ist – funktioniert für beliebige Farben.
   const chipFg = hex => {
     const h = hex.replace('#','');
     const c = [0,2,4].map(i => parseInt(h.substr(i,2),16)/255);
@@ -251,8 +200,8 @@
   const dObj = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); };
   const fmtDow = d => d.toLocaleDateString('de-DE', { weekday:'long' });
   const fmtDmy = d => d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const heute = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
 
-  // Filter-Chips aus TEAMS erzeugen (vor dem "Nur Heimspiele"-Schalter einfügen)
   Object.entries(TEAMS).forEach(([key, t]) => {
     aktiv[key] = true;
     const b = document.createElement('button');
@@ -269,52 +218,55 @@
   });
   heimOnly.addEventListener('change', render);
 
-  function render(){
-    // Nach Datum + Zeit sortieren, dann nach Datum gruppieren ("nach Wochen")
-    const sichtbar = SPIELTAGE.filter(st =>
-      aktiv[st.team] && (!heimOnly.checked || istHeim(st))
-    ).sort((a,b) =>
-      a.datum.localeCompare(b.datum) || a.zeit.localeCompare(b.zeit)
-    );
+  const karte = st => {
+    const t = TEAMS[st.team];
+    const gegner = st.spiele.map((g,i) => `<li><span class="vs">Spiel ${i+1}</span>${esc(g)}</li>`).join('');
+    return `
+      <article class="match" style="--team:${t.color};--chip-fg:${chipFg(t.color)}">
+        <div class="match__top">
+          <span class="chip">${esc(t.name)}</span>
+          <span class="time">${esc(st.zeit)} Uhr</span>
+          ${istHeim(st) ? '<span class="heim">Heimspiel</span>' : ''}
+        </div>
+        <ul class="games">${gegner}</ul>
+        <div class="host">Ausrichter: <b>${esc(st.ausrichter)}</b></div>
+      </article>`;
+  };
 
-    if (!sichtbar.length){
-      plan.innerHTML = '<p class="empty">Keine Spieltage für die aktuelle Auswahl.</p>';
-      return;
-    }
-
-    const gruppen = {};
-    for (const st of sichtbar) (gruppen[st.datum] ||= []).push(st);
-
-    plan.innerHTML = Object.entries(gruppen).map(([iso, tage]) => {
+  const gruppiere = liste => {
+    const g = {};
+    for (const st of liste) (g[st.datum] ||= []).push(st);
+    return Object.entries(g).map(([iso, tage]) => {
       const d = dObj(iso);
-      const karten = tage.map(st => {
-        const t = TEAMS[st.team];
-        const heim = istHeim(st);
-        const gegner = st.spiele.map((g,i) =>
-          `<li><span class="vs">Spiel ${i+1}</span>${esc(g)}</li>`).join('');
-        return `
-          <article class="match" data-team="${st.team}" style="--team:${t.color};--chip-fg:${chipFg(t.color)}">
-            <div class="match__top">
-              <span class="chip">${esc(t.name)}</span>
-              <span class="time">${esc(st.zeit)} Uhr</span>
-              ${heim ? '<span class="heim">Heimspiel</span>' : ''}
-            </div>
-            <ul class="games">${gegner}</ul>
-            <div class="host">Ausrichter: <b>${esc(st.ausrichter)}</b></div>
-          </article>`;
-      }).join('');
-
       return `
         <section class="week">
           <div class="week__date">
             <span class="week__dow">${fmtDow(d)}</span>
             <span class="week__dmy">${fmtDmy(d)}</span>
           </div>
-          <div class="week__matches">${karten}</div>
+          <div class="week__matches">${tage.map(karte).join('')}</div>
         </section>`;
     }).join('');
-  }
+  };
 
+  function render(){
+    const sichtbar = SPIELTAGE.filter(st => aktiv[st.team] && (!heimOnly.checked || istHeim(st)))
+      .sort((a,b) => a.datum.localeCompare(b.datum) || a.zeit.localeCompare(b.zeit));
+
+    if (!sichtbar.length){
+      plan.innerHTML = '<p class="empty">Keine Spieltage für die aktuelle Auswahl.</p>';
+      return;
+    }
+    const kommend = sichtbar.filter(st => dObj(st.datum) >= heute);
+    const vorbei  = sichtbar.filter(st => dObj(st.datum) <  heute);
+
+    let html = '';
+    if (kommend.length) html += gruppiere(kommend);
+    else html += '<p class="empty">Keine anstehenden Spieltage für die aktuelle Auswahl.</p>';
+    if (vorbei.length)
+      html += `<h2 class="section-title">Vergangene Spieltage</h2><div class="past">${gruppiere(vorbei)}</div>`;
+    plan.innerHTML = html;
+  }
   render();
 </script>
 </body>
